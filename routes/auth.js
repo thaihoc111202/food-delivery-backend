@@ -1,11 +1,8 @@
-
-
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const verifyToken = require("../middleware/authMiddleware");
+
 
 // ================= ĐĂNG KÝ =================
 router.post("/register", async (req, res) => {
@@ -18,7 +15,6 @@ router.post("/register", async (req, res) => {
       if (result.length > 0) {
         return res.status(400).json({ message: "Email đã tồn tại" });
       }
-
       const hashedPassword = await bcrypt.hash(password, 10);
 
       db.query(
@@ -47,7 +43,6 @@ router.post("/register", async (req, res) => {
 // ================= ĐĂNG NHẬP =================
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
-
   db.query("SELECT * FROM users WHERE email = ?", [email], async (err, result) => {
     if (err) return res.status(500).json(err);
 
@@ -63,19 +58,8 @@ router.post("/login", (req, res) => {
       return res.status(400).json({ message: "Email hoặc mật khẩu không đúng" });
     }
 
-    // 🔥 THÊM JWT Ở ĐÂY
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES || "7d" }
-    );
-
     res.json({
       message: "Đăng nhập thành công",
-      token, // ✅ thêm token
       user: {
         id: user.id,
         email: user.email
@@ -84,13 +68,9 @@ router.post("/login", (req, res) => {
   });
 });
 
-
 // ================= ĐỔI MẬT KHẨU =================
-// 🔥 DÙNG JWT → KHÔNG cần userId nữa
-router.post("/change-password", verifyToken, async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
-
-  const userId = req.user.id; // ✅ lấy từ token
+router.post("/change-password", async (req, res) => {
+  const { userId, oldPassword, newPassword } = req.body;
 
   try {
     db.query("SELECT * FROM users WHERE id = ?", [userId], async (err, result) => {
@@ -110,6 +90,7 @@ router.post("/change-password", verifyToken, async (req, res) => {
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
+      // 4. Update mật khẩu
       db.query(
         "UPDATE users SET password = ? WHERE id = ?",
         [hashedPassword, userId],
