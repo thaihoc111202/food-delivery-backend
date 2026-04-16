@@ -1,18 +1,14 @@
-
-
-// module.exports = router;
-
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
-const verifyToken = require("../middleware/authMiddleware");
+
 
 // ================= 1. ADD TO CART =================
-router.post("/add", verifyToken, (req, res) => {
-  const { productId } = req.body;
-  const userId = req.user.id; // 🔥 lấy từ token
+// POST /api/cart/add
+router.post("/add", (req, res) => {
+  const { userId, productId } = req.body;
 
-  if (!productId) {
+  if (!userId || !productId) {
     return res.status(400).json({ message: "Thiếu dữ liệu" });
   }
 
@@ -31,8 +27,9 @@ router.post("/add", verifyToken, (req, res) => {
 
 
 // ================= 2. LẤY GIỎ HÀNG =================
-router.get("/", verifyToken, (req, res) => {
-  const userId = req.user.id;
+// GET /api/cart/:userId
+router.get("/:userId", (req, res) => {
+  const userId = req.params.userId;
 
   const sql = `
     SELECT ci.id AS cart_item_id,
@@ -46,17 +43,18 @@ router.get("/", verifyToken, (req, res) => {
     JOIN products p ON ci.product_id = p.id
     WHERE ci.user_id = ?
   `;
-
   db.query(sql, [userId], (err, items) => {
     if (err) return res.status(500).json(err);
-
-    res.json({ items });
+    res.json({
+      items
+    });
   });
 });
 
 
-// ================= 3. UPDATE =================
-router.put("/update", verifyToken, (req, res) => {
+// ================= 3. UPDATE SỐ LƯỢNG =================
+// PUT /api/cart/update
+router.put("/update", (req, res) => {
   const { cartItemId, quantity } = req.body;
 
   if (!cartItemId || quantity == null) {
@@ -81,8 +79,9 @@ router.put("/update", verifyToken, (req, res) => {
 });
 
 
-// ================= 4. DELETE ITEM =================
-router.delete("/delete/:id", verifyToken, (req, res) => {
+// ================= 4. XÓA 1 SẢN PHẨM =================
+// DELETE /api/cart/delete/:id
+router.delete("/delete/:id", (req, res) => {
   const id = req.params.id;
 
   db.query("DELETE FROM cart_items WHERE id = ?", [id], (err) => {
@@ -93,13 +92,15 @@ router.delete("/delete/:id", verifyToken, (req, res) => {
 
 
 // ================= 5. CLEAR CART =================
-router.delete("/clear", verifyToken, (req, res) => {
-  const userId = req.user.id;
+// DELETE /api/cart/clear/:userId
+router.delete("/clear/:userId", (req, res) => {
+  const userId = req.params.userId;
 
   db.query("DELETE FROM cart_items WHERE user_id = ?", [userId], (err) => {
     if (err) return res.status(500).json(err);
     res.json({ message: "Đã xóa toàn bộ giỏ hàng" });
   });
 });
+
 
 module.exports = router;
