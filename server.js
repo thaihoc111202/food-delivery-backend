@@ -10,9 +10,6 @@ const cartRoutes = require("./routes/cart");
 const ordersRoutes = require("./routes/orders");
 const categoriesRoutes = require("./routes/categories");
 
-// Middleware
-app.use(cors());
-app.use(express.json());
 
 // API routes
 app.use("/api/auth", authRoutes);
