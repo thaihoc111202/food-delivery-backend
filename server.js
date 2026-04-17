@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 require("dotenv").config();
-=======
->>>>>>> 843677cd145f8945168d17119dcc5189dcca9571
 const express = require("express");
 const app = express();
 const cors = require("cors");
