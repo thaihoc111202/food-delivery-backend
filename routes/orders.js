@@ -64,8 +64,8 @@ router.get("/order-details/:orderId", (req, res) => {
 
 //Tạo order
 router.post("/addOrder", (req, res) => {
-  const { userId, receiverName, receiverAddress, paymentMethod, totalPrice } = req.body;
-
+  const { receiverName, receiverAddress, paymentMethod, totalPrice } = req.body;
+  const userId = req.user.userId; // Get userId from authenticated user
   const getCartSql = `
     SELECT product_id, quantity
     FROM cart_items
