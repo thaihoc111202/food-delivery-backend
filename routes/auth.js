@@ -120,6 +120,7 @@ router.post("/change-password", verifyToken, async (req, res) => {
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
+      // 4. Update mật khẩu
       db.query(
         "UPDATE users SET password = ? WHERE id = ?",
         [hashedPassword, userId],

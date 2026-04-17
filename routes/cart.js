@@ -8,7 +8,7 @@ router.post("/add", (req, res) => {
   const { productId } = req.body;
   const userId = req.user.userId;
 
-  if (!productId) {
+  if (!userId || !productId) {
     return res.status(400).json({ message: "Thiếu dữ liệu" });
   }
 
@@ -119,5 +119,6 @@ router.delete("/clear", (req, res) => {
     res.json({ message: "Đã xóa toàn bộ giỏ hàng" });
   });
 });
+
 
 module.exports = router;
