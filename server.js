@@ -1,64 +1,33 @@
-// const express = require("express");
-// const app = express();
-// const cors = require("cors");
-// require("dotenv").config();
-
-// const authRoutes = require("./routes/auth");
-// const productRoutes = require("./routes/products");
-// const cartRoutes = require("./routes/cart");
-// const ordersRoutes = require("./routes/orders");
-// const categoriesRoutes = require("./routes/categories");
-
-// app.use(cors());
-// app.use(express.json());
-
-// app.use("/api/orders", ordersRoutes);
-// app.use("/api/products", productRoutes);
-// app.use("/api/auth", authRoutes);
-// app.use("/api/cart", cartRoutes);
-// app.use("/api/categories", categoriesRoutes);
-
-
-// app.get("/", (req, res) => {
-//   res.send("API đang chạy...");
-// });
-
-// const PORT = 3000;
-// app.listen(PORT, () => {
-//   console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
-// });
-
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
-require("dotenv").config();
 
-// Routes
+
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/products");
 const cartRoutes = require("./routes/cart");
 const ordersRoutes = require("./routes/orders");
 const categoriesRoutes = require("./routes/categories");
+const verifyToken = require("./mid/authMiddleware");
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// API routes
+// Routes không cần xác thực
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
-app.use("/api/cart", cartRoutes);
-app.use("/api/orders", ordersRoutes);
 app.use("/api/categories", categoriesRoutes);
 
-// Test API
+// Routes cần xác thực
+app.use("/api/cart", verifyToken, cartRoutes);
+app.use("/api/orders", verifyToken, ordersRoutes);
+
 app.get("/", (req, res) => {
   res.send("API đang chạy...");
 });
 
-// ⚠️ PORT cho deploy
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
-  console.log(`🚀 Server chạy tại port ${PORT}`);
+  console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
 });
